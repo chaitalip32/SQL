@@ -236,8 +236,18 @@ where e.Salary=(select max(Salary) from Employees);
 --Department Name
 --Employee Name
 --Salary
---Find employees whose salary is greater than the average salary of their own department.
 
+SELECT d.DepartmentName,
+       e.Name AS EmployeeName,
+       e.Salary
+FROM Employees e
+INNER JOIN Departments d
+    ON e.DepartmentID = d.DepartmentID
+WHERE e.Salary = (
+    SELECT MAX(e2.Salary)
+    FROM Employees e2
+    WHERE e2.DepartmentID = e.DepartmentID
+);
 
 --16. Above Department Average 🔥
 --Find employees whose salary is greater than the average salary of their own department.
@@ -245,6 +255,13 @@ where e.Salary=(select max(Salary) from Employees);
 --Employee Name
 --Department Name
 --Salary
+select e.Name, d.DepartmentName , e.Salary
+from Employees e
+inner join Departments d
+on e.DepartmentID=d.DepartmentID
+where e.Salary > (Select avg(e2.Salary) 
+                from Employees e2
+                where e2.DepartmentID=e.DepartmentID); 
 
 --17. Department Salary Analysis 🔥
 --Display each department along with:
@@ -254,6 +271,11 @@ where e.Salary=(select max(Salary) from Employees);
 --Maximum Salary
 --Average Salary
 --Total Salary
+select d.DepartmentName, count(e.EmployeeID) as Total_Employees, min(e.Salary) as min_salary, max(e.Salary) as max_salary, avg(e.Salary) as Avg_Salary, sum(e.Salary) as Total_Salary
+from Departments d
+left join Employees e
+on d.DepartmentID=e.DepartmentID
+group by d.DepartmentName;
 
 --18. Interview Challenge 🔥🔥
 --Find the second-highest salary in each department.
@@ -262,3 +284,16 @@ where e.Salary=(select max(Salary) from Employees);
 --Department Name
 --Employee Name
 --Salary
+select DepartmentName, Name, Salary
+from(
+    select d.DepartmentName,e.Name,e.Salary,
+        DENSE_RANK() over(
+            partition by d.DepartmentID
+            order by e.Salary DESC
+        ) AS SalaryRank
+    from Employees e
+    inner join Departments d
+         on e.DepartmentID=d.DepartmentID
+) AS RankedEmployees
+where SalaryRank=2;
+
